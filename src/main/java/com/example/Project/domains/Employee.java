@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @Entity
-
 @Table
 public class Employee {
 
@@ -33,8 +32,6 @@ public class Employee {
     @Email (message = "Please enter the valid email address!")
     private String email;
 
-    @NotBlank (message = "field 'department' must not be null!")
-    private String department;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -45,6 +42,9 @@ public class Employee {
     @Column(name = "updated_at", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+    @NotBlank(message = "field 'department' must not be null!")
+    private String department;
 
     public Employee(String name, Long age, String location, String email, String department) {
         this.name = name;

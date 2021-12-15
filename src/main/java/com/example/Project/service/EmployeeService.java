@@ -5,10 +5,13 @@ import com.example.Project.repos.EmployeeRepo;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 
 @Service
@@ -21,7 +24,7 @@ public class EmployeeService {
     }
 
     public List<Employee> getEmployees(int pageNumber, int pageSize) {
-        Pageable pages = PageRequest.of(pageNumber, pageSize);
+        Pageable pages = PageRequest.of(pageNumber, pageSize, DESC, "id");
         return repo.findAll(pages).getContent();
     }
 
@@ -36,17 +39,27 @@ public class EmployeeService {
     }
 
     public Employee updateEmployee(Employee employee) {
-        return  repo.save(employee);
+        return repo.save(employee);
     }
 
-    public  List<Employee> getEmployeeByNameAndLocation(String name, String location){
+    public List<Employee> getEmployeeByNameAndLocation(String name, String location) {
         return repo.findByNameAndLocation(name, location);
     }
 
-    public  List<Employee> getEmployeeByKeyword(String keyword){
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+    public List<Employee> getEmployeeByKeyword(String keyword) {
+        Sort sort = Sort.by(DESC, "id");
         return repo.findByNameContaining(keyword, sort);
     }
+
+    public List<Employee> getEmployeeByNameOrLocation(String name, String location) {
+        return repo.getEmployeesByNameAndLocation(name, location);
+    }
+
+    public Integer deleteByName(String name){
+        return repo.deleteEmployeeByName(name);
+    }
+
+
 }
 
 
