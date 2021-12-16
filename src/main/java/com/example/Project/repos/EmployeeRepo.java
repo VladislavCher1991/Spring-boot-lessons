@@ -14,15 +14,18 @@ import java.util.List;
 @Repository
 public interface EmployeeRepo extends PagingAndSortingRepository<Employee, Long> {
 
-    List<Employee> findByNameAndLocation(String name, String location);
+    List<Employee> findByUsernameAndLocation(String name, String location);
 
-    List<Employee>  findByNameContaining(String keyword, Sort sort);
+    List<Employee>  findByUsernameContaining(String keyword, Sort sort);
 
-    @Query("FROM Employee WHERE name = :name OR location = :location")
-    List<Employee> getEmployeesByNameAndLocation (@Param("name") String asd, String location);
+    @Query("FROM Employee WHERE username = :username OR location = :location")
+    List<Employee> getEmployeesByNameAndLocation (@Param("username") String asd, String location);
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM Employee WHERE name = :name")
-    Integer deleteEmployeeByName(String name);
+    @Query("DELETE FROM Employee WHERE username = :username")
+    Integer deleteEmployeeByusername(String username);
+
+    Employee findByUsername(String username);
 }
+

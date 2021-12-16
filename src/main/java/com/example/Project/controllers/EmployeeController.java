@@ -81,7 +81,7 @@ public class EmployeeController {
             @PathVariable Long id,
             @RequestBody Employee employee) {
         employee.setId(id);
-        service.updateEmployee(employee);
+        service.saveEmployee(employee);
         if (depRepo.findByName(employee.getDepartment()) == null) return new ResponseEntity<>
                 ("department with name: " +employee.getDepartment() + " didn't found in the database", BAD_REQUEST);
         return new ResponseEntity<>("Employee with id: " + employee.getId() + " has been successfully edited", OK);

@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,10 +23,11 @@ public class Employee {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "field 'name' must not be null!")
-    private String name;
+    @Column(unique = true)
+    @NotBlank(message = "field 'username' must not be null!")
+    private String username;
 
-    private Long age = 0L;
+    private String password;
 
     private String location;
 
@@ -46,11 +48,14 @@ public class Employee {
     @NotBlank(message = "field 'department' must not be null!")
     private String department;
 
-    public Employee(String name, Long age, String location, String email, String department) {
-        this.name = name;
-        this.age = age;
+    @ManyToMany
+    private List<Role> roles;
+
+    public Employee(String username, String location, String email, String department, String password) {
+        this.username = username;
         this.location = location;
         this.email = email;
         this.department = department;
+        this.password = password;
     }
 }
