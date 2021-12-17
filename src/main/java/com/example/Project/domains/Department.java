@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table (name = "tbl_department")
+@Table (name = "departments")
 @NoArgsConstructor
 public class Department {
 
@@ -21,13 +21,12 @@ public class Department {
     @Column(unique = true)
     private String name;
 
-    @OneToMany (cascade = CascadeType.ALL)
+    @OneToMany (fetch = FetchType.LAZY)
     @JoinColumn (name = "employee_id")
-
     private List<Employee> employees;
 
-    public Department(String name) {
+    public Department(String name, List<Employee> employees) {
         this.name = name;
+        this.employees = employees;
     }
-
 }

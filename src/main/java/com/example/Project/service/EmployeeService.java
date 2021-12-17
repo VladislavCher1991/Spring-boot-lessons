@@ -1,7 +1,10 @@
 package com.example.Project.service;
 
+import com.example.Project.domains.Department;
 import com.example.Project.domains.Employee;
+import com.example.Project.domains.EmployeeIDCard;
 import com.example.Project.domains.Role;
+import com.example.Project.repos.DepartmentRepo;
 import com.example.Project.repos.EmployeeRepo;
 import com.example.Project.repos.RoleRepo;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +29,23 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EmployeeService implements UserDetailsService {
 
     private final RoleRepo roleRepo;
     private final EmployeeRepo employeeRepo;
     private final PasswordEncoder encoder;
+    private final DepartmentRepo departmentRepo;
 
 
-    public List<Employee> getEmployees(int pageNumber, int pageSize) {
+    public List<Employee> getPagesOfEmployees(int pageNumber, int pageSize) {
         Pageable pages = PageRequest.of(pageNumber, pageSize, DESC, "id");
         return employeeRepo.findAll(pages).getContent();
     }
 
-    public Employee saveEmployee(Employee employee) {
+    public Employee saveEmployee(Employee employee, EmployeeIDCard idCard) {
         employee.setPassword(encoder.encode(employee.getPassword()));
+        employee.setEmployeeIDCard(idCard);
         return employeeRepo.save(employee);
     }
 
@@ -48,8 +55,8 @@ public class EmployeeService implements UserDetailsService {
         return employee.get();
     }
 
-    public List<Employee> getEmployeeByNameAndLocation(String name, String location) {
-        return employeeRepo.findByUsernameAndLocation(name, location);
+    public List<Employee> getEmployeeByNameAndEmail(String name, String email) {
+        return employeeRepo.findByUsernameAndEmail(name, email);
     }
 
     public List<Employee> getEmployeeByKeyword(String keyword) {
@@ -57,12 +64,12 @@ public class EmployeeService implements UserDetailsService {
         return employeeRepo.findByUsernameContaining(keyword, sort);
     }
 
-    public List<Employee> getEmployeeByNameOrLocation(String name, String location) {
-        return employeeRepo.getEmployeesByNameAndLocation(name, location);
+    public List<Employee> getEmployeeByNameOrEmail(String name, String email) {
+        return employeeRepo.getEmployeesByNameAndEmail(name, email);
     }
 
     public Integer deleteByName(String name) {
-        return employeeRepo.deleteEmployeeByusername(name);
+        return employeeRepo.deleteEmployeeByUsername(name);
     }
 
     public Employee validateEmployeeByUsername(String username) {
@@ -71,21 +78,20 @@ public class EmployeeService implements UserDetailsService {
         return employee;
     }
 
-    public void saveRole (Role role) {
-        roleRepo.save(role);
+    public Role saveRole(Role role) {
+        return roleRepo.save(role);
     }
 
-    public Role validateRoleByRoleName(String roleName) {
+    public Role validateRoleByName(String roleName) {
         Role role = roleRepo.findByName(roleName);
         if (role == null) throw new UsernameNotFoundException("No role with such name exists in DB!");
         return role;
     }
 
-    public void addRolesToEmployee(String username, String roleName) {
-        Employee employee = validateEmployeeByUsername(username);
-        Role role = validateRoleByRoleName(roleName);
-
-        employee.getRoles().add(role);
+    public void addRoleToEmployee(String username, String roleName) {
+        validateEmployeeByUsername(username)
+                .getRoles()
+                .add(validateRoleByName(roleName));
     }
 
     @Override
@@ -99,6 +105,23 @@ public class EmployeeService implements UserDetailsService {
 
         return new User(securityUsername, securityPassword, authorities);
     }
+
+    public Department saveDepartment(Department department) {
+        return departmentRepo.save(department);
+    }
+
+    public Department validateDepartmentByName(String departmentName) {
+        Department department = departmentRepo.findByName(departmentName);
+        if (department == null) throw new UsernameNotFoundException("No department with such name exists in DB!");
+        return department;
+    }
+
+    public void addEmployeeToDepartment(String username, String departmentName) {
+        validateDepartmentByName(departmentName)
+                .getEmployees()
+                .add(validateEmployeeByUsername(username));
+    }
+
 }
 
 

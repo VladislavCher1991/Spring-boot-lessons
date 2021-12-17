@@ -12,7 +12,7 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 @Entity
-@Table
+@Table (name = "roles")
 public class Role {
 
     @Id
@@ -21,4 +21,8 @@ public class Role {
 
     @Column(unique = true)
     private String name;
+
+    public Role(String name) {
+        this.name = name;
+    }
 }

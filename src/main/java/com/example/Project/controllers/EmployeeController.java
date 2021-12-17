@@ -2,6 +2,7 @@ package com.example.Project.controllers;
 
 import com.example.Project.domains.Department;
 import com.example.Project.domains.Employee;
+import com.example.Project.domains.EmployeeIDCard;
 import com.example.Project.repos.DepartmentRepo;
 import com.example.Project.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class EmployeeController {
 
-    private final DepartmentRepo depRepo;
     private final EmployeeService service;
 
     @Value("${app.name}")
@@ -28,6 +28,11 @@ public class EmployeeController {
     @Value("${app.version}")
     private String appVersion;
 
+    @GetMapping("/")
+    public String helloPage() {
+        return "helloPage";
+    }
+
 
     @GetMapping("/info")
     public ResponseEntity<String> getAppDetails() {
@@ -35,10 +40,11 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees")
-    public ResponseEntity<List<Employee>> getEmployees(@RequestParam Integer pageNumber,
-                                                       @RequestParam Integer pageSize) {
-        return new ResponseEntity<>(service.getEmployees(pageNumber, pageSize), OK);
+    public ResponseEntity<List<Employee>> getPagesOfEmployees(@RequestParam Integer pageNumber,
+                                                              @RequestParam Integer pageSize) {
+        return new ResponseEntity<>(service.getPagesOfEmployees(pageNumber, pageSize), OK);
     }
+
 
     @GetMapping("/employees/{id}")
     public ResponseEntity<String> getEmployee(@PathVariable Long id) {
@@ -53,15 +59,9 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees")
-    private ResponseEntity<Employee> saveEmployee(@Valid @RequestBody Employee employee) {
-        Department depFromDB = depRepo.findByName(employee.getDepartment());
-        if (depFromDB == null) {
-            Department department = new Department(employee.getDepartment());
-            department.setEmployees(new ArrayList<>());
-            department.getEmployees().add(employee);
-            depRepo.save(department);
-        } else depFromDB.getEmployees().add(employee);
-        return new ResponseEntity<>(service.saveEmployee(employee), CREATED);
+    private ResponseEntity<Employee> saveEmployee(@Valid @RequestBody Employee employee,
+                                                  @RequestBody EmployeeIDCard idCard) {
+        return new ResponseEntity<>(service.saveEmployee(employee, idCard), CREATED);
     }
 
     @DeleteMapping("/employees")
@@ -79,18 +79,17 @@ public class EmployeeController {
     @PutMapping("/employees/{id}")
     public ResponseEntity<String> editEmployee(
             @PathVariable Long id,
-            @RequestBody Employee employee) {
+            @RequestBody Employee employee,
+            @RequestBody EmployeeIDCard idCard){
         employee.setId(id);
-        service.saveEmployee(employee);
-        if (depRepo.findByName(employee.getDepartment()) == null) return new ResponseEntity<>
-                ("department with name: " +employee.getDepartment() + " didn't found in the database", BAD_REQUEST);
+        service.saveEmployee(employee, idCard);
         return new ResponseEntity<>("Employee with id: " + employee.getId() + " has been successfully edited", OK);
     }
 
     @GetMapping("employees/filter/nameAndLocation")
     public ResponseEntity<List<Employee>> getByNameAndLocation(@RequestParam String name,
-                                                               @RequestParam String location) {
-        return new ResponseEntity<>(service.getEmployeeByNameAndLocation(name, location), OK);
+                                                               @RequestParam String email) {
+        return new ResponseEntity<>(service.getEmployeeByNameAndEmail(name, email), OK);
     }
 
     @GetMapping("employees/filter/nameKeyword")
@@ -99,9 +98,9 @@ public class EmployeeController {
     }
 
     @GetMapping("employees/{name}/{location}")
-    public ResponseEntity<List<Employee>> getByNameOrLocation(@PathVariable String name,
-                                                              @PathVariable String location) {
-        return new ResponseEntity<>(service.getEmployeeByNameOrLocation(name, location), OK);
+    public ResponseEntity<List<Employee>> getByNameOrEmail(@PathVariable String name,
+                                                              @PathVariable String email) {
+        return new ResponseEntity<>(service.getEmployeeByNameOrEmail(name, email), OK);
     }
 
     @DeleteMapping("employees/delete/{name}")
