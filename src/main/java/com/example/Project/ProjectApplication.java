@@ -22,7 +22,7 @@ public class ProjectApplication {
 	}
 
 	@Bean
-	CommandLineRunner runner (EmployeeService service, BCryptPasswordEncoder encoder){
+	CommandLineRunner runner (EmployeeService service){
 		return args -> {
 			service.saveRole(new Role("ROLE_ADMIN"));
 			service.saveRole(new Role("ROLE_USER"));
